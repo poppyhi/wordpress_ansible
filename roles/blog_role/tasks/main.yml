@@ -1,0 +1,4 @@
+---
+# include tasks
+- include: configure_db.yml
+- include: configure_wordpress.yml

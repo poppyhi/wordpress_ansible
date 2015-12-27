@@ -1,0 +1,17 @@
+---
+
+- name: restart firewalld
+  service: name=firewalld state=restarted
+  tags: firewalld
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  tags: wordpress
+
+- name: restart mariadb
+  service: name=mariadb state=restarted
+  tags: mariadb
+
+- name: restart php-fpm
+  service: name=php-fpm state=restarted
+  tags: wordpress

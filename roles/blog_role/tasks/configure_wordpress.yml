@@ -1,0 +1,68 @@
+---
+- name: nginx repo
+  yum: name=http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm state=present
+  tags: wordpress
+
+- name: install nginx
+  yum: name=nginx state=present
+  tags: wordpress
+
+- name: install php
+  yum: name={{ item }} state=present
+  with_items:
+    - php
+    - php-common
+    - php-mysql
+    - php-cgi
+    - php-fpm
+    - php-gd
+    - php-mbstring
+  tags: wordpress
+
+- name: php-fpm running
+  service: name=php-fpm state=started enabled=yes
+  tags: wordpress
+
+- name: setting php-fpm config
+  template: src=www.conf.j2 dest=/etc/php-fpm.d/www.conf owner=root group=root mode=0644
+  notify: restart php-fpm
+  tags: wordpress
+
+- name: make directory for logs
+  file: path="{{ log_path }}" state=directory owner=nginx group=nginx mode=0775
+  tags: wordpress
+
+- name: Download WordPress
+  get_url: url="{{ wordpress_download }}" dest=/tmp/wordpress.tar.gz
+  tags: wordpress
+
+- name: Unarchive Wordpress
+  unarchive: src=/tmp/wordpress.tar.gz dest="{{ www_root_path }}" copy=no
+  tags: wordpress
+
+- name: change wordpress permission
+  file: path="{{ wordpress_root_path }}" owner=nginx group=nginx mode=0755 recurse=yes state=directory
+  tags: wordpress
+
+- name: nginx running
+  service: name=nginx state=started enabled=yes
+  tags: wordpress
+
+- name: set nginx config
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf owner=root group=root mode=0644
+  notify: restart nginx
+  tags: wordpress
+
+- name: set nginx wordpress config
+  template: src=wordpress.conf.j2 dest=/etc/nginx/conf.d/wordpress.conf owner=root group=root mode=0644
+  notify: restart nginx
+  tags: wordpress
+
+- name: set selinux mariadb wordpress
+  command: /sbin/setsebool -P httpd_can_network_connect_db 1
+  tags: selinux
+
+- name: set firewalld http
+  firewalld: zone=public service=http permanent=true state=enabled
+  notify: restart firewalld
+  tags: firewalld

@@ -1,0 +1,30 @@
+---
+- name: install MariaDB
+  yum: name={{ item }} state=present
+  with_items:
+    - mariadb
+    - mariadb-server
+    - mariadb-libs
+    - MySQL-python
+  tags: database
+
+- name: mariadb running
+  service: name=mariadb state=started enabled=yes
+  tags: database
+
+- name: root password setting
+  mysql_user: name=root host=localhost password="{{ mariadb_root_password }}"
+  tags: database
+
+- name: setting mariadb config
+  template: src=my.cnf.j2 dest=/root/.my.cnf owner=root group=root mode=0644
+  notify: restart mariadb
+  tags: database
+
+- name: create database wordpress
+  mysql_db: name=wordpress state=present encoding=utf8
+  tags: database
+
+- name: create user wordpress
+  mysql_user: name=wordpress password="{{ wordpress_db_password }}" priv="wordpress.*:ALL" host=localhost state=present
+  tags: database

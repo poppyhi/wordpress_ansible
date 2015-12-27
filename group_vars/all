@@ -1,0 +1,15 @@
+---
+# Variables listed here are applicable to all host groups
+
+# wordpress_role
+server_name: [server_name]
+www_root_path: /var/www
+wordpress_root_path: /var/www/wordpress
+log_path: /var/log/nginx/wordpress
+access_log: /var/log/nginx/wordpress/access.log
+error_log: /var/log/nginx/wordpress/error.log
+wordpress_download: "http://ja.wordpress.org/wordpress-4.3.1-ja.tar.gz"
+
+# db
+mariadb_root_password: [db_root_password]
+wordpress_db_password: [db_wp_password]
